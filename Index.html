@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Food Assistant — Final Homework Package</title>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin="anonymous"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,500&family=IBM+Plex+Sans:wght@400;500;600&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'IBM Plex Sans','Sarabun',system-ui,sans-serif;background:var(--bg,#F7F1E8);color:var(--ink,#2C1810);line-height:1.6;min-height:100vh}
+
+/* HEADER */
+.app-header{background:linear-gradient(135deg,#0d2f2c 0%,#134e49 45%,#1a6860 100%);color:white;padding:36px 24px 30px;position:relative;overflow:hidden}
+.app-header::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 72% 35%,rgba(255,255,255,0.06) 0%,transparent 55%),radial-gradient(ellipse at 8% 85%,rgba(100,220,200,0.08) 0%,transparent 50%)}
+.food-deco{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.food-deco span{position:absolute;font-size:2rem;opacity:.13;filter:blur(1px);user-select:none}
+.hi{max-width:1200px;margin:0 auto;position:relative}
+.badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);border-radius:20px;padding:4px 14px;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:14px;backdrop-filter:blur(4px)}
+.htitle{font-family:'IBM Plex Sans','Sarabun',sans-serif;font-size:clamp(1.7rem,4vw,2.6rem);font-weight:800;line-height:1.15;margin-bottom:6px;letter-spacing:-0.02em}
+.hsub{opacity:.82;font-size:.9rem;margin-bottom:20px;font-weight:400}
+.hmeta{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.mchip{background:rgba(255,255,255,0.14);border:1px solid rgba(255,255,255,0.22);border-radius:20px;padding:5px 13px;font-size:.78rem;font-weight:600;backdrop-filter:blur(4px)}
+.lbtn{margin-left:auto;background:rgba(255,255,255,0.18);border:1.5px solid rgba(255,255,255,0.32);border-radius:8px;color:white;padding:5px 16px;font-size:.82rem;font-weight:700;cursor:pointer;transition:background .2s;backdrop-filter:blur(4px)}
+.lbtn:hover{background:rgba(255,255,255,0.28)}
+
+/* FILTER BAR */
+.fbar{position:sticky;top:0;z-index:100;background:var(--card);border-bottom:1px solid var(--bord);box-shadow:0 2px 14px rgba(44,24,16,.08)}
+.fi{max-width:1200px;margin:0 auto;padding:10px 20px;display:flex;flex-wrap:wrap;gap:9px;align-items:center}
+.flbl{font-size:.70rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);white-space:nowrap}
+.pill{border:1.5px solid var(--bord);border-radius:20px;padding:4px 11px;font-size:.78rem;font-weight:500;cursor:pointer;transition:all .18s;background:transparent;color:var(--ink);white-space:nowrap;font-family:inherit}
+.pill:hover{border-color:var(--acc);color:var(--acc)}
+.pill.on{background:var(--acc);border-color:var(--acc);color:white}
+.sep{width:1px;height:26px;background:var(--bord);flex-shrink:0}
+.srt{border:1.5px solid var(--bord);border-radius:8px;padding:5px 9px;font-size:.80rem;background:transparent;color:var(--ink);cursor:pointer;outline:none;font-family:inherit}
+.vbtn{border:1.5px solid var(--bord);border-radius:8px;padding:5px 10px;font-size:.88rem;background:transparent;color:var(--ink);cursor:pointer;transition:all .18s;font-family:inherit;line-height:1}
+.vbtn.on{background:var(--ink);color:white;border-color:var(--ink)}
+.wbtn{background:var(--acc);color:white;border:none;border-radius:8px;padding:6px 14px;font-size:.80rem;font-weight:600;cursor:pointer;transition:opacity .18s;white-space:nowrap;font-family:inherit}
+.wbtn:hover{opacity:.85}
+
+/* WEIGHT PANEL */
+.wpanel{background:var(--surf);border-bottom:1px solid var(--bord)}
+.wi{max-width:1200px;margin:0 auto;padding:18px 20px}
+.wgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
+.witem label{display:block;font-size:.70rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:5px}
+.wval{float:right;font-size:.88rem;font-weight:700;color:var(--acc)}
+.wslide{width:100%;cursor:pointer;margin-bottom:4px;accent-color:var(--acc)}
+.wfoot{display:flex;justify-content:flex-end;align-items:center;gap:12px;margin-top:10px}
+.wreset{background:none;border:1.5px solid var(--bord);border-radius:6px;padding:4px 12px;font-size:.76rem;color:var(--muted);cursor:pointer;font-family:inherit}
+
+/* MAIN */
+.main{max-width:1200px;margin:0 auto;padding:22px 20px}
+
+/* CARDS */
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(295px,1fr));gap:16px}
+.rcard{background:var(--card);border:1.5px solid var(--bord);border-radius:16px;padding:20px;cursor:pointer;transition:box-shadow .22s,transform .22s,border-color .22s}
+.rcard:hover{box-shadow:0 8px 32px rgba(44,24,16,.14);transform:translateY(-2px);border-color:var(--acc)}
+.ctop{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:13px}
+.crkbadge{width:31px;height:31px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.82rem;color:white;flex-shrink:0}
+.r1{background:linear-gradient(135deg,#D4A043,#B88218)}
+.r2{background:linear-gradient(135deg,#A0A8B0,#7888A0)}
+.r3{background:linear-gradient(135deg,#CD7F32,#A86020)}
+.rn{background:var(--bord);color:var(--muted)}
+.cscore{font-family:'Playfair Display',serif;font-size:2.3rem;font-weight:800;line-height:1;color:var(--acc)}
+.csdenom{font-size:.82rem;font-weight:400;color:var(--muted);margin-left:2px}
+.cname{font-family:'Playfair Display','Sarabun',serif;font-size:1.08rem;font-weight:700;line-height:1.3;margin-bottom:2px}
+.ctype{font-size:.76rem;color:var(--muted);margin-bottom:11px}
+.cmeta{display:flex;gap:10px;margin-bottom:13px;flex-wrap:wrap}
+.cmi{display:flex;align-items:center;gap:4px;font-size:.78rem;color:var(--muted)}
+.cmi strong{color:var(--ink)}
+.sbk{display:flex;flex-direction:column;gap:4px}
+.srow{display:flex;align-items:center;gap:7px}
+.srlab{width:52px;font-size:.66rem;text-transform:capitalize;color:var(--muted);flex-shrink:0}
+.srval{width:26px;text-align:right;font-size:.68rem;font-weight:600;color:var(--ink)}
+.ctags{display:flex;flex-wrap:wrap;gap:5px;margin-top:12px}
+.tchip{font-size:.68rem;font-weight:600;padding:3px 8px;border-radius:10px}
+
+/* TABLE */
+.twrap{overflow-x:auto;border-radius:12px;border:1.5px solid var(--bord)}
+table{width:100%;border-collapse:collapse;background:var(--card);font-size:.82rem}
+thead{background:var(--ink);color:white}
+thead th{padding:11px 10px;text-align:left;font-size:.70rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;cursor:pointer;user-select:none}
+thead th:hover{opacity:.8}
+tbody tr{border-bottom:1px solid var(--bord);cursor:pointer;transition:background .15s}
+tbody tr:hover{background:var(--surf)}
+tbody tr:last-child{border-bottom:none}
+tbody td{padding:10px;vertical-align:middle}
+.trk{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.76rem;color:white}
+.tscore{font-weight:800;font-size:1rem;color:var(--acc)}
+.barcell{display:flex;flex-direction:column;gap:2px;min-width:70px}
+
+/* MAGAZINE */
+.mag3{display:grid;grid-template-columns:2fr 1fr 1fr;gap:14px;margin-bottom:22px}
+.mcard{background:var(--card);border-radius:16px;border:1.5px solid var(--bord);padding:22px;cursor:pointer;transition:transform .2s,box-shadow .2s;position:relative;overflow:hidden}
+.mcard:hover{transform:translateY(-3px);box-shadow:0 10px 32px rgba(44,24,16,.13)}
+.mcard.gold{border-color:#D4A043;border-width:2px}
+.mnum{font-family:'Playfair Display',serif;font-size:5rem;font-weight:800;line-height:1;color:var(--acc);opacity:.1;position:absolute;top:6px;right:14px}
+.mname{font-family:'Playfair Display','Sarabun',serif;font-size:1.3rem;font-weight:800;line-height:1.2;margin-bottom:5px}
+.mlist{display:flex;flex-direction:column;gap:8px}
+.mli{display:flex;align-items:center;gap:12px;background:var(--card);border:1.5px solid var(--bord);border-radius:10px;padding:11px 14px;cursor:pointer;transition:border-color .18s}
+.mli:hover{border-color:var(--acc)}
+
+/* HOMEWORK EVIDENCE */
+.evidence{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin:22px 0}
+.evcard{background:var(--card);border:1.5px solid var(--bord);border-radius:16px;padding:18px;box-shadow:0 4px 18px rgba(44,24,16,.06)}
+.evtitle{font-family:'Playfair Display','Sarabun',serif;font-size:1.05rem;font-weight:800;margin-bottom:8px;color:var(--ink)}
+.evtext{font-size:.82rem;color:var(--muted);line-height:1.55}
+.evlist{margin:8px 0 0 18px;font-size:.82rem;color:var(--ink)}
+.evlist li{margin:4px 0}
+.section-title{font-family:'Playfair Display','Sarabun',serif;font-size:1.32rem;font-weight:800;margin:24px 0 8px;color:var(--ink)}
+.submit-box{background:linear-gradient(135deg,rgba(196,103,58,.10),rgba(212,160,67,.10));border:1.5px dashed var(--acc);border-radius:16px;padding:18px;margin:22px 0;font-size:.84rem}
+.kpirow{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:14px 0}
+.kpi{background:var(--surf);border-radius:12px;padding:12px;text-align:center;border:1px solid var(--bord)}
+.kpin{font-size:1.35rem;font-weight:800;color:var(--acc);line-height:1}
+.kpil{font-size:.72rem;color:var(--muted);margin-top:4px}
+
+/* MODAL */
+.movl{position:fixed;inset:0;background:rgba(44,24,16,.55);backdrop-filter:blur(5px);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px}
+.mbox{background:var(--card);border-radius:20px;max-width:660px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 24px 80px rgba(44,24,16,.32)}
+.mhdr{background:var(--hbg);color:white;padding:26px 28px;border-radius:20px 20px 0 0;position:relative}
+.mclose{position:absolute;top:14px;right:14px;background:rgba(255,255,255,0.14);border:none;border-radius:50%;width:30px;height:30px;color:white;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.mbody{padding:22px 24px}
+.msec{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);margin:16px 0 9px}
+.mscrow{display:flex;align-items:center;gap:10px;margin-bottom:7px}
+.msclbl{width:130px;font-size:.80rem;color:var(--muted);flex-shrink:0}
+.mscbar{flex:1;height:8px;background:var(--bord);border-radius:4px;overflow:hidden}
+.mscfil{height:100%;border-radius:4px;transition:width .7s cubic-bezier(.4,0,.2,1)}
+.mscnum{width:52px;text-align:right;font-size:.80rem;font-weight:700}
+.pc{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.pci{display:flex;gap:8px;align-items:flex-start;font-size:.82rem;line-height:1.5}
+.pd{color:#5C7A3E;font-weight:700;font-size:.95rem;flex-shrink:0}
+.cd{color:#C4673A;font-weight:700;font-size:.95rem;flex-shrink:0}
+.sentbar{display:flex;height:9px;border-radius:5px;overflow:hidden;margin-top:6px}
+.empty{text-align:center;padding:60px 20px;color:var(--muted);font-size:1rem}
+
+@media(max-width:900px){.mag3{grid-template-columns:1fr}}
+@media(max-width:640px){.cgrid{grid-template-columns:1fr}.pc{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+// ─── TWEAKS PANEL ────────────────────────────────────────────
+function useTweaks(defaults) {
+  const [state, setState] = React.useState({ ...defaults });
+  const set = (key, value) => setState((prev) => ({ ...prev, [key]: value }));
+  return [state, set];
+}
+
+function TweaksPanel({ children }) {
+  const [open, setOpen] = React.useState(false);
+  return (
+    <div style={{ position:'fixed',bottom:20,right:20,zIndex:999,fontFamily:"'IBM Plex Sans','Sarabun',system-ui,sans-serif" }}>
+      {open && (
+        <div style={{ background:'var(--card,#FEFCF8)',border:'1.5px solid var(--bord,#DDD0BE)',borderRadius:14,padding:'14px 18px',marginBottom:10,minWidth:220,boxShadow:'0 8px 32px rgba(44,24,16,.18)' }}>
+          <div style={{ fontSize:'.70rem',fontWeight:700,textTransform:'uppercase',letterSpacing:'1px',color:'var(--muted,#8A7468)',marginBottom:12 }}>⚙️ Settings</div>
+          {children}
+        </div>
+      )}
+      <button onClick={() => setOpen((o) => !o)} title="Toggle settings"
+        style={{ width:42,height:42,borderRadius:'50%',border:'1.5px solid var(--bord,#DDD0BE)',background:open?'var(--acc,#C4673A)':'var(--card,#FEFCF8)',color:open?'white':'var(--ink,#2C1810)',fontSize:'1.1rem',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 4px 16px rgba(44,24,16,.14)',marginLeft:'auto',transition:'background .2s,color .2s' }}>
+        {open ? '✕' : '⚙️'}
+      </button>
+    </div>
+  );
+}
+
+function TweakSection({ label }) {
+  return (
+    <div style={{ fontSize:'.68rem',fontWeight:700,textTransform:'uppercase',letterSpacing:'.8px',color:'var(--muted,#8A7468)',margin:'12px 0 6px',borderTop:'1px solid var(--bord,#DDD0BE)',paddingTop:10 }}>
+      {label}
+    </div>
+  );
+}
+
+function TweakRadio({ label, value, options, onChange }) {
+  const opts = options.map((o) => typeof o === 'string' ? { label: o, value: o } : o);
+  return (
+    <div style={{ marginBottom:10 }}>
+      {label && <div style={{ fontSize:'.72rem',color:'var(--muted,#8A7468)',marginBottom:5 }}>{label}</div>}
+      <div style={{ display:'flex',flexWrap:'wrap',gap:5 }}>
+        {opts.map((o) => {
+          const active = o.value === value;
+          return (
+            <button key={o.value} onClick={() => onChange(o.value)}
+              style={{ border:`1.5px solid ${active?'var(--acc,#C4673A)':'var(--bord,#DDD0BE)'}`,borderRadius:20,padding:'3px 11px',fontSize:'.74rem',fontWeight:active?700:500,cursor:'pointer',background:active?'var(--acc,#C4673A)':'transparent',color:active?'white':'var(--ink,#2C1810)',fontFamily:'inherit',transition:'all .15s' }}>
+              {o.label}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+</script>
+
+<script type="text/babel">
+const { useState, useMemo, useEffect } = React;
+
+// ─── THEMES ───────────────────────────────────────────────────
+const THEMES = {
+  warm: { '--bg':'#F7F1E8','--card':'#FEFCF8','--surf':'#EFE8DA','--ink':'#2C1810','--acc':'#C4673A','--acc2':'#D4A043','--acc3':'#5C7A3E','--muted':'#8A7468','--bord':'#DDD0BE','--hbg':'linear-gradient(135deg,#0d2f2c 0%,#134e49 45%,#1a6860 100%)' },
+  dark:  { '--bg':'#1A1008','--card':'#261508','--surf':'#1E1205','--ink':'#F0E6D6','--acc':'#E8853D','--acc2':'#D4A247','--acc3':'#7BAE6A','--muted':'#9A8070','--bord':'#3A2010','--hbg':'linear-gradient(135deg,#0d2f2c 0%,#134e49 45%,#1a6860 100%)' },
+  sage:  { '--bg':'#EEF2EC','--card':'#F8FAF7','--surf':'#E2EBE0','--ink':'#1E2D1A','--acc':'#4A7A52','--acc2':'#8B6B3D','--acc3':'#C4673A','--muted':'#6A7D66','--bord':'#C8DAC5','--hbg':'linear-gradient(135deg,#0d2f2c 0%,#134e49 45%,#1a6860 100%)' }
+};
+
+// ─── WEIGHTS & KEYS ───────────────────────────────────────────
+const DW = { rating:25, group:20, price:15, travel:15, data:15, unique:10 };
+const WKEYS = [
+  { k:'rating', th:'Rating & Review',    en:'Rating & Review',    max:40, col:'#C4673A' },
+  { k:'group',  th:'Group Suitability',  en:'Group Suitability',  max:40, col:'#D4A043' },
+  { k:'price',  th:'Price Suitability',  en:'Price Suitability',  max:30, col:'#5C7A3E' },
+  { k:'travel', th:'Travel Convenience', en:'Travel Convenience', max:30, col:'#2980B9' },
+  { k:'data',   th:'Data Completeness',  en:'Data Completeness',  max:30, col:'#8E44AD' },
+  { k:'unique', th:'Uniqueness / Exp',   en:'Uniqueness / Exp',   max:20, col:'#E67E22' }
+];
+
+// ─── RESTAURANT DATA (fallback — replaced by live Google Sheets fetch) ────────────
+const FALLBACK_DATA = [
+  { id:1, name:'Unico 23 Italian Dining', cuisine:'western', typeTh:'ร้านอาหารอิตาเลียน', typeEn:'ร้านอาหารอิตาเลียน',
+    rating:4.6, rev:460, price:600, pl:3, bts:5, grp:'good',
+    rs:{ rating:0.92, group:0.7, price:0.3, travel:0.93, data:0.61, unique:0.65 },
+    prosTh:['Rating 4.6★ (460+ รีวิว)','ใกล้ย่านอโศก · BTS'],
+    prosEn:['Rating 4.6★ (460+ reviews)','Near Asok BTS area'],
+    consTh:['โปรดตรวจสอบเวลาเปิดก่อนเยี่ยม'],
+    consEn:['Check opening hours before visiting'],
+    hlTh:'ร้านอาหารอิตาเลียน ย่านอโศก', hlEn:'ร้านอาหารอิตาเลียน near Asok',
+    sent:{ p:92, n:20, neg:10 }, url:'https://www.google.com/maps/search/?api=1&query=Unico%2023%20Italian%20Dining&query_place_id=ChIJtd7vquSe4jAReAifwElh9Z8' },
+
+  { id:2, name:'เคนชิน อิซากายะ สาขาอโศก', cuisine:'japanese', typeTh:'ร้านอาหารอิซาคายะ', typeEn:'ร้านอาหารอิซาคายะ',
+    rating:4.3, rev:1693, price:350, pl:2, bts:5, grp:'good',
+    rs:{ rating:0.86, group:0.7, price:0.55, travel:0.93, data:0.92, unique:0.57 },
+    prosTh:['Rating 4.3★ (1693+ รีวิว)','ใกล้ย่านอโศก · BTS'],
+    prosEn:['Rating 4.3★ (1693+ reviews)','Near Asok BTS area'],
+    consTh:['โปรดตรวจสอบเวลาเปิดก่อนเยี่ยม'],
+    consEn:['Check opening hours before visiting'],
+    hlTh:'ร้านอาหารอิซาคายะ ย่านอโศก', hlEn:'ร้านอาหารอิซาคายะ near Asok',
+    sent:{ p:89, n:20, neg:10 }, url:'https://www.google.com/maps/search/?api=1&query=%E0%B9%80%E0%B8%84%E0%B8%99%E0%B8%8A%E0%B8%B4%E0%B8%99%20%E0%B8%AD%E0%B8%B4%E0%B8%8B%E0%B8%B2%E0%B8%81%E0%B8%B2%E0%B8%A2%E0%B8%B0%20%E0%B8%AA%E0%B8%B2%E0%B8%82%E0%B8%B2%E0%B8%AD%E0%B9%82%E0%B8%A8%E0%B8%81&query_place_id=ChIJRbk96-Se4jAR_aE0uywzTRM' },
+
+  { id:3, name:'บิ๊ก มาม่า อาหารอิตาเลียน', cuisine:'western', typeTh:'ร้านอาหารอิตาเลียน', typeEn:'ร้านอาหารอิตาเลียน',
+    rating:4.5, rev:3392, price:80, pl:1, bts:5, grp:'good',
+    rs:{ rating:0.9, group:1.0, price:1.0, travel:0.93, data:0.95, unique:0.62 },
+    prosTh:['Rating 4.5★ (3392+ รีวิว)','ใกล้ย่านอโศก · BTS'],
+    prosEn:['Rating 4.5★ (3392+ reviews)','Near Asok BTS area'],
+    consTh:['โปรดตรวจสอบเวลาเปิดก่อนเยี่ยม'],
+    consEn:['Check opening hours before visiting'],
+    hlTh:'ร้านอาหารอิตาเลียน ย่านอโศก', hlEn:'ร้านอาหารอิตาเลียน near Asok',
+    sent:{ p:91, n:20, neg:10 }, url:'https://www.google.com/maps/search/?api=1&query=%E0%B8%9A%E0%B8%B4%E0%B9%8A%E0%B8%81%20%E0%B8%A1%E0%B8%B2%E0%B8%A1%E0%B9%88%E0%B8%B2%20%E0%B8%AD%E0%B8%B2%E0%B8%AB%E0%B8%B2%E0%B8%A3%E0%B8%AD%E0%B8%B4%E0%B8%95%E0%B8%B2%E0%B9%80%E0%B8%A5%E0%B8%B5%E0%B8%A2%E0%B8%99&query_place_id=ChIJi-pmk-Se4jARCDDEZaF5zfw' },
+
+  { id:4, name:'เสวย เทอร์มินอล 21 อโศก', cuisine:'thai', typeTh:'ภัตตาคารอาหารทะเล', typeEn:'ภัตตาคารอาหารทะเล',
+    rating:4.6, rev:3622, price:320, pl:2, bts:1, grp:'good',
+    rs:{ rating:0.92, group:0.7, price:0.6, travel:1.0, data:0.95, unique:0.65 },
+    prosTh:['Rating 4.6★ (3622+ รีวิว)','ใกล้ย่านอโศก · BTS'],
+    prosEn:['Rating 4.6★ (3622+ reviews)','Near Asok BTS area'],
+    consTh:['โปรดตรวจสอบเวลาเปิดก่อนเยี่ยม'],
+    consEn:['Check opening hours before visiting'],
+    hlTh:'ภัตตาคารอาหารทะเล ย่านอโศก', hlEn:'ภัตตาคารอาหารทะเล near Asok',
+    sent:{ p:92, n:20, neg:10 }, url:'https://www.google.com/maps/search/?api=1&query=%E0%B9%80%E0%B8%AA%E0%B8%A7%E0%B8%A2%20%E0%B9%80%E0%B8%97%E0%B8%AD%E0%B8%A3%E0%B9%8C%E0%B8%A1%E0%B8%B4%E0%B8%99%E0%B8%AD%E0%B8%A5%2021%20%E0%B8%AD%E0%B9%82%E0%B8%A8%E0%B8%81&query_place_id=ChIJ1afT-oif4jARvl-Fq22OydQ' },
+
+  { id:5, name:'Hokkaido Yakidon Baan Kampu Asoke', cuisine:'japanese', typeTh:'ภัตตาคารอาหารญี่ปุ่น', typeEn:'ภัตตาคารอาหารญี่ปุ่น',
+    rating:4.8, rev:66, price:280, pl:2, bts:1, grp:'good',
+    rs:{ rating:0.96, group:1.0, price:0.67, travel:1.0, data:0.52, unique:0.7 },
+    prosTh:['Rating 4.8★ (66+ รีวิว)','ใกล้ย่านอโศก · BTS'],
+    prosEn:['Rating 4.8★ (66+ reviews)','Near Asok BTS area'],
+    consTh:['โปรดตรวจสอบเวลาเปิดก่อนเยี่ยม'],
+    consEn:['Check opening hours before visiting'],
+    hlTh:'ภัตตาคารอาหารญี่ปุ่น ย่านอโศก', hlEn:'ภัตตาคารอาหารญี่ปุ่น near Asok',
+    sent:{ p:93, n:20, neg:10 }, url:'https://www.google.com/maps/search/?api=1&query=Hokkaido%20Yakidon%20Baan%20Kampu%20Asoke&query_place_id=ChIJk34ex9uf4jARNSqWLFu7PYw' },
+
+  { id:6, name:'อีท แอม อา อาคาร 253 อโศก', cuisine:'western', typeTh:'ร้านสเต็ก', typeEn:'ร้านสเต็ก',
+    rating:4.5, rev:1441, price:450, pl:3, bts:5, grp:'good',
+    rs:{ rating:0.9, group:0.7, price:0.38, travel:0.93, data:0.86, unique:0.62 },
+    prosTh:['Rating 4.5★ (1441+ รีวิว)','ใกล้ย่านอโศก · BTS'],
+    prosEn:['Rating 4.5★ (1441+ reviews)','Near Asok BTS area'],
+    consTh:['โปรดตรวจสอบเวลาเปิดก่อนเยี่ยม'],
+    consEn:['Check opening hours before visiting'],
+    hlTh:'ร้านสเต็ก ย่านอโศก', hlEn:'ร้านสเต็ก near Asok',
+    sent:{ p:91, n:20, neg:10 }, url:'https://www.google.com/maps/search/?api=1&query=%E0%B8%AD%E0%B8%B5%E0%B8%97%20%E0%B9%81%E0%B8%AD%E0%B8%A1%20%E0%B8%AD%E0%B8%B2%20%E0%B8%AD%E0%B8%B2%E0%B8%84%E0%B8%B2%E0%B8%A3%20253%20%E0%B8%AD%E0%B9%82%E0%B8%A8%E0%B8%81&query_place_id=ChIJtz6LEiOf4jARORWzcrLDLBc' },
+
+  { id:7, name:'Saigonese Asoke', cuisine:'western', typeTh:'ภัตตาคารอาหารเวียดนาม', typeEn:'ภัตตาคารอาหารเวียดนาม',
+    rating:4.8, rev:60, price:220, pl:2, bts:5, grp:'good',
+    rs:{ rating:0.96, group:1.0, price:0.77, travel:0.93, data:0.52, unique:0.7 },
+    prosTh:['Rating 4.8★ (60+ รีวิว)','ใกล้ย่านอโศก · BTS'],
+    prosEn:['Rating 4.8★ (60+ reviews)','Near Asok BTS area'],
+    consTh:['โปรดตรวจสอบเวลาเปิดก่อนเยี่ยม'],
+    consEn:['Check opening hours before visiting'],
+    hlTh:'ภัตตาคารอาหารเวียดนาม ย่านอโศก', hlEn:'ภัตตาคารอาหารเวียดนาม near Asok',
+    sent:{ p:93, n:20, neg:10 }, url:'https://www.google.com/maps/search/?api=1&query=Saigonese%20Asoke&query_place_id=ChIJw7ro_Y-f4jARxBj9wA1PJVA' },
+
+  { id:8, name:'Thai Thai Boat Noodles Terminal 21 Asok', cuisine:'thai', typeTh:'ร้านก๋วยเตี๋ยว', typeEn:'ร้านก๋วยเตี๋ยว',
+    rating:4.5, rev:643, price:90, pl:1, bts:1, grp:'good',
+    rs:{ rating:0.9, group:1.0, price:0.98, travel:1.0, data:0.66, unique:0.62 },
+    prosTh:['Rating 4.5★ (643+ รีวิว)','ใกล้ย่านอโศก · BTS'],
+    prosEn:['Rating 4.5★ (643+ reviews)','Near Asok BTS area'],
+    consTh:['โปรดตรวจสอบเวลาเปิดก่อนเยี่ยม'],
+    consEn:['Check opening hours before visiting'],
+    hlTh:'ร้านก๋วยเตี๋ยว ย่านอโศก', hlEn:'ร้านก๋วยเตี๋ยว near Asok',
+    sent:{ p:91, n:20, neg:10 }, url:'https://www.google.com/maps/search/?api=1&query=Thai%20Thai%20Boat%20Noodles%20Terminal%2021%20Asok&query_place_id=ChIJ4zwpQ2af4jAReRREq3JTfCY' },
+
+  { id:9, name:'ASOK PETHOUSE CAT CAFE', cuisine:'mixed', typeTh:'คาเฟ่แมว', typeEn:'คาเฟ่แมว',
+    rating:4.7, rev:1546, price:150, pl:1, bts:5, grp:'good',
+    rs:{ rating:0.94, group:1.0, price:0.88, travel:0.93, data:0.89, unique:0.68 },
+    prosTh:['Rating 4.7★ (1546+ รีวิว)','ใกล้ย่านอโศก · BTS'],
+    prosEn:['Rating 4.7★ (1546+ reviews)','Near Asok BTS area'],
+    consTh:['โปรดตรวจสอบเวลาเปิดก่อนเยี่ยม'],
+    consEn:['Check opening hours before visiting'],
+    hlTh:'คาเฟ่แมว ย่านอโศก', hlEn:'คาเฟ่แมว near Asok',
+    sent:{ p:93, n:20, neg:10 }, url:'https://www.google.com/maps/search/?api=1&query=ASOK%20PETHOUSE%20CAT%20CAFE&query_place_id=ChIJD-fYAfCf4jARNfOfSo_aAo4' },
+
+  { id:10, name:'BARTELS Asok - Sourdough Sandwiches, Coffee & Juicery', cuisine:'mixed', typeTh:'ภัตตาคารอาหารเช้าและกลางวัน', typeEn:'ภัตตาคารอาหารเช้าและกลางวัน',
+    rating:4.8, rev:2449, price:160, pl:2, bts:2, grp:'good',
+    rs:{ rating:0.96, group:1.0, price:0.87, travel:1.0, data:0.95, unique:0.7 },
+    prosTh:['Rating 4.8★ (2449+ รีวิว)','ใกล้ย่านอโศก · BTS'],
+    prosEn:['Rating 4.8★ (2449+ reviews)','Near Asok BTS area'],
+    consTh:['โปรดตรวจสอบเวลาเปิดก่อนเยี่ยม'],
+    consEn:['Check opening hours before visiting'],
+    hlTh:'ภัตตาคารอาหารเช้าและกลางวัน ย่านอโศก', hlEn:'ภัตตาคารอาหารเช้าและกลางวัน near Asok',
+    sent:{ p:93, n:20, neg:10 }, url:'https://www.google.com/maps/search/?api=1&query=BARTELS%20Asok%20-%20Sourdough%20Sandwiches%2C%20Coffee%20%26%20Juicery&query_place_id=ChIJa7RbIkGf4jARxc9xrSROCts' },
+
+  { id:11, name:'ผัดไทยพลีส Pad Thai Please - Terminal 21 Asok', cuisine:'thai', typeTh:'ร้านอาหารไทย', typeEn:'ร้านอาหารไทย',
+    rating:4.9, rev:207, price:120, pl:1, bts:1, grp:'good',
+    rs:{ rating:0.98, group:1.0, price:0.93, travel:1.0, data:0.55, unique:0.73 },
+    prosTh:['Rating 4.9★ (207+ รีวิว)','ใกล้ย่านอโศก · BTS'],
+    prosEn:['Rating 4.9★ (207+ reviews)','Near Asok BTS area'],
+    consTh:['โปรดตรวจสอบเวลาเปิดก่อนเยี่ยม'],
+    consEn:['Check opening hours before visiting'],
+    hlTh:'ผัดไทยชื่อดัง ย่านอโศก Rating 4.9★', hlEn:'Famous Pad Thai near Asok',
+    sent:{ p:94, n:20, neg:10 }, url:'https://www.google.com/maps/search/?api=1&query=%E0%B8%9C%E0%B8%B1%E0%B8%94%E0%B9%84%E0%B8%97%E0%B8%A2%E0%B8%9E%E0%B8%A5%E0%B8%B5%E0%B8%AA%20Pad%20Thai%20Please%20-%20Terminal%2021%20Asok&query_place_id=ChIJH3n2ZFGf4jAR3sLvZam_TDE' },
+
+  { id:12, name:'Antico Fornaio - Crafted Italian focaccia - Asoke', cuisine:'western', typeTh:'ร้านแซนด์วิช', typeEn:'ร้านแซนด์วิช',
+    rating:4.9, rev:51, price:220, pl:2, bts:5, grp:'good',
+    rs:{ rating:0.98, group:1.0, price:0.77, travel:0.93, data:0.51, unique:0.73 },
+    prosTh:['Rating 4.9★ (51+ รีวิว)','ใกล้ย่านอโศก · BTS'],
+    prosEn:['Rating 4.9★ (51+ reviews)','Near Asok BTS area'],
+    consTh:['โปรดตรวจสอบเวลาเปิดก่อนเยี่ยม'],
+    consEn:['Check opening hours before visiting'],
+    hlTh:'ร้านแซนด์วิช ย่านอโศก', hlEn:'ร้านแซนด์วิช near Asok',
+    sent:{ p:94, n:20, neg:10 }, url:'https://www.google.com/maps/search/?api=1&query=Antico%20Fornaio%20-%20Crafted%20Italian%20focaccia%20-%20Asoke&query_place_id=ChIJx9lTRXOf4jAR9ACu8IqccM0' },
+
+  { id:13, name:'Sunrise Tacos MEXICAN GRILL', cuisine:'western', typeTh:'ภัตตาคารอาหารเม็กซิกัน', typeEn:'ภัตตาคารอาหารเม็กซิกัน',
+    rating:4.7, rev:5004, price:250, pl:2, bts:5, grp:'good',
+    rs:{ rating:0.94, group:1.0, price:0.72, travel:0.93, data:0.95, unique:0.68 },
+    prosTh:['Rating 4.7★ (5004+ รีวิว)','ใกล้ย่านอโศก · BTS'],
+    prosEn:['Rating 4.7★ (5004+ reviews)','Near Asok BTS area'],
+    consTh:['โปรดตรวจสอบเวลาเปิดก่อนเยี่ยม'],
+    consEn:['Check opening hours before visiting'],
+    hlTh:'ภัตตาคารอาหารเม็กซิกัน ย่านอโศก', hlEn:'ภัตตาคารอาหารเม็กซิกัน near Asok',
+    sent:{ p:93, n:20, neg:10 }, url:'https://www.google.com/maps/search/?api=1&query=Sunrise%20Tacos%20MEXICAN%20GRILL&query_place_id=ChIJxaq1oeOe4jAROvyHinpPC-Q' },
+
+  { id:14, name:'ปิง หูฉลาม อโศก', cuisine:'chinese', typeTh:'ภัตตาคารอาหารจีน', typeEn:'ภัตตาคารอาหารจีน',
+    rating:4.6, rev:1595, price:280, pl:2, bts:5, grp:'good',
+    rs:{ rating:0.92, group:1.0, price:0.67, travel:0.93, data:0.9, unique:0.65 },
+    prosTh:['Rating 4.6★ (1595+ รีวิว)','ใกล้ย่านอโศก · BTS'],
+    prosEn:['Rating 4.6★ (1595+ reviews)','Near Asok BTS area'],
+    consTh:['โปรดตรวจสอบเวลาเปิดก่อนเยี่ยม'],
+    consEn:['Check opening hours before visiting'],
+    hlTh:'ภัตตาคารอาหารจีน ย่านอโศก', hlEn:'ภัตตาคารอาหารจีน near Asok',
+    sent:{ p:92, n:20, neg:10 }, url:'https://www.google.com/maps/search/?api=1&query=%E0%B8%9B%E0%B8%B4%E0%B8%87%20%E0%B8%AB%E0%B8%B9%E0%B8%89%E0%B8%A5%E0%B8%B2%E0%B8%A1%20%E0%B8%AD%E0%B9%82%E0%B8%A8%E0%B8%81&query_place_id=ChIJnfQQnAGf4jARkEY6N_nZR74' },
+
+  { id:15, name:'โรซาโน อิตาเลียน คูซีน', cuisine:'western', typeTh:'ร้านอาหารอิตาเลียน', typeEn:'ร้านอาหารอิตาเลียน',
+    rating:4.5, rev:1138, price:320, pl:2, bts:5, grp:'good',
+    rs:{ rating:0.9, group:0.7, price:0.6, travel:0.93, data:0.78, unique:0.62 },
+    prosTh:['Rating 4.5★ (1138+ รีวิว)','ใกล้ย่านอโศก · BTS'],
+    prosEn:['Rating 4.5★ (1138+ reviews)','Near Asok BTS area'],
+    consTh:['โปรดตรวจสอบเวลาเปิดก่อนเยี่ยม'],
+    consEn:['Check opening hours before visiting'],
+    hlTh:'ร้านอาหารอิตาเลียน ย่านอโศก', hlEn:'ร้านอาหารอิตาเลียน near Asok',
+    sent:{ p:91, n:20, neg:10 }, url:'https://www.google.com/maps/search/?api=1&query=%E0%B9%82%E0%B8%A3%E0%B8%8B%E0%B8%B2%E0%B9%82%E0%B8%99%20%E0%B8%AD%E0%B8%B4%E0%B8%95%E0%B8%B2%E0%B9%80%E0%B8%A5%E0%B8%B5%E0%B8%A2%E0%B8%99%20%E0%B8%84%E0%B8%B9%E0%B8%8B%E0%B8%B5%E0%B8%99&query_place_id=ChIJge5RZOOe4jARzWYZ3jGvKbA' },
+
+  { id:16, name:'Hachicken Ramen (Terminal21 Asok)', cuisine:'japanese', typeTh:'ร้านอาหารราเมน', typeEn:'ร้านอาหารราเมน',
+    rating:4.7, rev:1202, price:260, pl:2, bts:1, grp:'good',
+    rs:{ rating:0.94, group:1.0, price:0.7, travel:1.0, data:0.8, unique:0.68 },
+    prosTh:['Rating 4.7★ (1202+ รีวิว)','ใกล้ย่านอโศก · BTS'],
+    prosEn:['Rating 4.7★ (1202+ reviews)','Near Asok BTS area'],
+    consTh:['โปรดตรวจสอบเวลาเปิดก่อนเยี่ยม'],
+    consEn:['Check opening hours before visiting'],
+    hlTh:'ร้านอาหารราเมน ย่านอโศก', hlEn:'ร้านอาหารราเมน near Asok',
+    sent:{ p:93, n:20, neg:10 }, url:'https://www.google.com/maps/search/?api=1&query=Hachicken%20Ramen%20(Terminal21%20Asok)&query_place_id=ChIJZVy5gm6f4jARZNIAsJKyW30' },
+
+  { id:17, name:'Firepork - Terminal21 Asok', cuisine:'mixed', typeTh:'ร้านอาหาร', typeEn:'ร้านอาหาร',
+    rating:4.8, rev:168, price:200, pl:2, bts:1, grp:'good',
+    rs:{ rating:0.96, group:1.0, price:0.8, travel:1.0, data:0.54, unique:0.7 },
+    prosTh:['Rating 4.8★ (168+ รีวิว)','ใกล้ย่านอโศก · BTS'],
+    prosEn:['Rating 4.8★ (168+ reviews)','Near Asok BTS area'],
+    consTh:['โปรดตรวจสอบเวลาเปิดก่อนเยี่ยม'],
+    consEn:['Check opening hours before visiting'],
+    hlTh:'ร้านอาหาร ย่านอโศก', hlEn:'ร้านอาหาร near Asok',
+    sent:{ p:93, n:20, neg:10 }, url:'https://www.google.com/maps/search/?api=1&query=Firepork%20-%20Terminal21%20Asok&query_place_id=ChIJWxTOhuKf4jARcTBCzVIB5n8' },
+
+  { id:18, name:'Restaurant Thai', cuisine:'thai', typeTh:'ภัตตาคารอาหารไทย', typeEn:'ภัตตาคารอาหารไทย',
+    rating:4.1, rev:160, price:180, pl:2, bts:5, grp:'good',
+    rs:{ rating:0.82, group:1.0, price:0.83, travel:0.93, data:0.54, unique:0.52 },
+    prosTh:['Rating 4.1★ (160+ รีวิว)','ใกล้ย่านอโศก · BTS'],
+    prosEn:['Rating 4.1★ (160+ reviews)','Near Asok BTS area'],
+    consTh:['โปรดตรวจสอบเวลาเปิดก่อนเยี่ยม'],
+    consEn:['Check opening hours before visiting'],
+    hlTh:'ภัตตาคารอาหารไทย ย่านอโศก', hlEn:'ภัตตาคารอาหารไทย near Asok',
+    sent:{ p:88, n:20, neg:10 }, url:'https://www.google.com/maps/search/?api=1&query=Restaurant%20Thai&query_place_id=ChIJr_hoVI2e4jARIf2gzA_MoCs' },
+
+  { id:19, name:'Madam Saranair Thai Food Restaurant', cuisine:'thai', typeTh:'ภัตตาคารอาหารไทย', typeEn:'ภัตตาคารอาหารไทย',
+    rating:4.5, rev:2191, price:240, pl:2, bts:5, grp:'good',
+    rs:{ rating:0.9, group:1.0, price:0.73, travel:0.93, data:0.95, unique:0.62 },
+    prosTh:['Rating 4.5★ (2191+ รีวิว)','ใกล้ย่านอโศก · BTS'],
+    prosEn:['Rating 4.5★ (2191+ reviews)','Near Asok BTS area'],
+    consTh:['โปรดตรวจสอบเวลาเปิดก่อนเยี่ยม'],
+    consEn:['Check opening hours before visiting'],
+    hlTh:'ภัตตาคารอาหารไทย ย่านอโศก', hlEn:'ภัตตาคารอาหารไทย near Asok',
+    sent:{ p:91, n:20, neg:10 }, url:'https://www.google.com/maps/search/?api=1&query=Madam%20Saranair%20Thai%20Food%20Restaurant&query_place_id=ChIJ1bV7lOSe4jARZfwCIKXKyNU' },
+
+  { id:20, name:'นาราไทย คูซีน', cuisine:'thai', typeTh:'ภัตตาคารอาหารไทย', typeEn:'ภัตตาคารอาหารไทย',
+    rating:4.7, rev:1136, price:350, pl:2, bts:5, grp:'good',
+    rs:{ rating:0.94, group:0.7, price:0.55, travel:0.93, data:0.78, unique:0.68 },
+    prosTh:['Rating 4.7★ (1136+ รีวิว)','ใกล้ย่านอโศก · BTS'],
+    prosEn:['Rating 4.7★ (1136+ reviews)','Near Asok BTS area'],
+    consTh:['โปรดตรวจสอบเวลาเปิดก่อนเยี่ยม'],
+    consEn:['Check opening hours before visiting'],
+    hlTh:'ภัตตาคารอาหารไทย ย่านอโศก', hlEn:'ภัตตาคารอาหารไทย near Asok',
+    sent:{ p:93, n:20, neg:10 }, url:'https://www.google.com/maps/search/?api=1&query=%E0%B8%99%E0%B8%B2%E0%B8%A3%E0%B8%B2%E0%B9%84%E0%B8%97%E0%B8%A2%20%E0%B8%84%E0%B8%B9%E0%B8%8B%E0%B8%B5%E0%B8%99&query_place_id=ChIJ5UUPyu6f4jARzil2TMt0IZg' },
+
+  { id:21, name:'Gigi Eatery Asoke', cuisine:'western', typeTh:'ร้านอาหารอิตาเลียน', typeEn:'ร้านอาหารอิตาเลียน',
+    rating:4.8, rev:3368, price:280, pl:2, bts:5, grp:'good',
+    rs:{ rating:0.96, group:1.0, price:0.67, travel:0.93, data:0.95, unique:0.7 },
+    prosTh:['Rating 4.8★ (3368+ รีวิว)','ใกล้ย่านอโศก · BTS'],
+    prosEn:['Rating 4.8★ (3368+ reviews)','Near Asok BTS area'],
+    consTh:['โปรดตรวจสอบเวลาเปิดก่อนเยี่ยม'],
+    consEn:['Check opening hours before visiting'],
+    hlTh:'ร้านอาหารอิตาเลียน ย่านอโศก', hlEn:'ร้านอาหารอิตาเลียน near Asok',
+    sent:{ p:93, n:20, neg:10 }, url:'https://www.google.com/maps/search/?api=1&query=Gigi%20Eatery%20Asoke&query_place_id=ChIJw5WEJoqf4jARFC4PiDtFCzc' },
+
+  { id:22, name:'ปาล่า พิซซ่า โรมานา', cuisine:'western', typeTh:'ร้านพิซซ่า', typeEn:'ร้านพิซซ่า',
+    rating:4.5, rev:4500, price:250, pl:2, bts:5, grp:'good',
+    rs:{ rating:0.9, group:1.0, price:0.72, travel:0.93, data:0.95, unique:0.62 },
+    prosTh:['Rating 4.5★ (4500+ รีวิว)','ใกล้ย่านอโศก · BTS'],
+    prosEn:['Rating 4.5★ (4500+ reviews)','Near Asok BTS area'],
+    consTh:['โปรดตรวจสอบเวลาเปิดก่อนเยี่ยม'],
+    consEn:['Check opening hours before visiting'],
+    hlTh:'ร้านพิซซ่า ย่านอโศก', hlEn:'ร้านพิซซ่า near Asok',
+    sent:{ p:91, n:20, neg:10 }, url:'https://www.google.com/maps/search/?api=1&query=%E0%B8%9B%E0%B8%B2%E0%B8%A5%E0%B9%88%E0%B8%B2%20%E0%B8%9E%E0%B8%B4%E0%B8%8B%E0%B8%8B%E0%B9%88%E0%B8%B2%20%E0%B9%82%E0%B8%A3%E0%B8%A1%E0%B8%B2%E0%B8%99%E0%B8%B2&query_place_id=ChIJc90ABuOe4jARvO5E1UXZcZI' },
+
+  { id:23, name:'getfresh at Terminal 21 Asok', cuisine:'mixed', typeTh:'ร้านอาหาร', typeEn:'ร้านอาหาร',
+    rating:4.8, rev:578, price:180, pl:2, bts:1, grp:'good',
+    rs:{ rating:0.96, group:1.0, price:0.83, travel:1.0, data:0.64, unique:0.7 },
+    prosTh:['Rating 4.8★ (578+ รีวิว)','ใกล้ย่านอโศก · BTS'],
+    prosEn:['Rating 4.8★ (578+ reviews)','Near Asok BTS area'],
+    consTh:['โปรดตรวจสอบเวลาเปิดก่อนเยี่ยม'],
+    consEn:['Check opening hours before visiting'],
+    hlTh:'ร้านอาหาร ย่านอโศก', hlEn:'ร้านอาหาร near Asok',
+    sent:{ p:93, n:20, neg:10 }, url:'https://www.google.com/maps/search/?api=1&query=getfresh%20at%20Terminal%2021%20Asok&query_place_id=ChIJSXzxqMKf4jARtTmd_SuaE2M' },
+
+  { id:24, name:'Elbasha Turkish & Lebanese Restaurant in Bangkok', cuisine:'western', typeTh:'ภัตตาคารอาหารเลบานอน', typeEn:'ภัตตาคารอาหารเลบานอน',
+    rating:4.7, rev:2380, price:280, pl:2, bts:5, grp:'good',
+    rs:{ rating:0.94, group:1.0, price:0.67, travel:0.93, data:0.95, unique:0.68 },
+    prosTh:['Rating 4.7★ (2380+ รีวิว)','ใกล้ย่านอโศก · BTS'],
+    prosEn:['Rating 4.7★ (2380+ reviews)','Near Asok BTS area'],
+    consTh:['โปรดตรวจสอบเวลาเปิดก่อนเยี่ยม'],
+    consEn:['Check opening hours before visiting'],
+    hlTh:'ภัตตาคารอาหารเลบานอน ย่านอโศก', hlEn:'ภัตตาคารอาหารเลบานอน near Asok',
+    sent:{ p:93, n:20, neg:10 }, url:'https://www.google.com/maps/search/?api=1&query=Elbasha%20Turkish%20%26%20Lebanese%20Restaurant%20in%20Bangkok&query_place_id=ChIJ0-I10zOf4jARV8SRMCyRRlw' },
+
+  { id:25, name:'Indulge Restaurant & Cocktail Bar', cuisine:'mixed', typeTh:'ภัตตาคารอาหารไทย', typeEn:'ภัตตาคารอาหารไทย',
+    rating:4.7, rev:3693, price:400, pl:3, bts:5, grp:'good',
+    rs:{ rating:0.94, group:0.7, price:0.47, travel:0.93, data:0.95, unique:0.68 },
+    prosTh:['Rating 4.7★ (3693+ รีวิว)','ใกล้ย่านอโศก · BTS'],
+    prosEn:['Rating 4.7★ (3693+ reviews)','Near Asok BTS area'],
+    consTh:['โปรดตรวจสอบเวลาเปิดก่อนเยี่ยม'],
+    consEn:['Check opening hours before visiting'],
+    hlTh:'ภัตตาคารอาหารไทย ย่านอโศก', hlEn:'ภัตตาคารอาหารไทย near Asok',
+    sent:{ p:93, n:20, neg:10 }, url:'https://www.google.com/maps/search/?api=1&query=Indulge%20Restaurant%20%26%20Cocktail%20Bar&query_place_id=ChIJvcw2HuOe4jARNkjje3ATS18' }
+];
+
+// ─── LIVE DATA FETCH FROM GOOGLE SHEETS ──────────────────────
+const SHEET_ID = '1QGKpS8ynD7-_PLnXQZORxgC7ovRcUO2Q5LeTHz3aqQU';
+
+async function fetchFromSheets() {
+  // Row 30+ = n8n-appended real restaurants; headers=0 so row 30 is row[0]
+  // Range extended to T200 to include area column (col T = index 19)
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=Clean%20Data&range=A30:T200&headers=0`;
+  const res = await fetch(url);
+  const text = await res.text();
+  // Strip JSONP wrapper: /*O_o*/ google.visualization.Query.setResponse({...});
+  const raw = text.replace(/^[^(]+\(/, '').replace(/\);\s*$/, '');
+  const json = JSON.parse(raw);
+  const rows = json.table.rows;
+
+  return rows
+    .filter(row => row.c && row.c[1]?.v)
+    .map((row, idx) => {
+      const g = (i) => row.c?.[i]?.v ?? null;
+      const name      = String(g(1) || '');
+      const typeEn    = String(g(2) || '');
+      const rating    = parseFloat(g(3))  || 0;
+      const reviews   = parseFloat(g(4))  || 0;
+      const price     = parseFloat(g(5))  || 200;
+      const bts       = parseFloat(g(6))  || 5;
+      const grp       = String(g(7)       || 'good');
+      const mapsUrl   = g(18) ? String(g(18)) : `https://maps.google.com/?q=${encodeURIComponent(name + ' Asok Bangkok')}`;
+
+      let cuisine = 'mixed';
+      const t = typeEn.toLowerCase();
+      if (t.includes('thai') || t.includes('seafood')) cuisine = 'thai';
+      else if (t.includes('japanese') || t.includes('ramen') || t.includes('sushi') || t.includes('izakaya')) cuisine = 'japanese';
+      else if (t.includes('korean')) cuisine = 'korean';
+      else if (t.includes('chinese') || t.includes('dim sum')) cuisine = 'chinese';
+      else if (t.includes('italian') || t.includes('western') || t.includes('steak') || t.includes('pizza')) cuisine = 'western';
+
+      const pl = price <= 150 ? 1 : price <= 350 ? 2 : price <= 600 ? 3 : 4;
+
+      const prosRaw = String(g(16) || '');
+      const consRaw = String(g(17) || '');
+      const pros = prosRaw.split(/[|\n]/).map(s => s.trim()).filter(Boolean);
+      const cons = consRaw.split(/[|\n]/).map(s => s.trim()).filter(Boolean);
+
+      return {
+        id: idx + 1,
+        name,
+        cuisine,
+        typeTh: typeEn,
+        typeEn,
+        rating,
+        rev: reviews,
+        price,
+        pl,
+        bts,
+        grp,
+        rs: {
+          rating: parseFloat(g(8))  || 0,
+          group:  parseFloat(g(9))  || 0,
+          price:  parseFloat(g(10)) || 0,
+          travel: parseFloat(g(11)) || 0,
+          data:   parseFloat(g(12)) || 0,
+          unique: parseFloat(g(13)) || 0,
+        },
+        prosTh: pros.length ? pros : [`Rating ${rating}★`],
+        prosEn: pros.length ? pros : [`Rating ${rating}★`],
+        consTh: cons.length ? cons : ['โปรดตรวจสอบข้อมูลก่อนเยี่ยม'],
+        consEn: cons.length ? cons : ['Please verify details before visiting'],
+        hlTh: String(g(15) || ''),
+        hlEn: String(g(15) || ''),
+        sent: { p: Math.min(95, Math.round(55 + rating * 8)), n: 20, neg: 10 },
+        url: mapsUrl,
+        area: String(g(19) || 'asok')   // col T = area (thonglor/siam/ari/promphong/asok)
+      };
+    });
+}
+
+const AREAS = [
+  { id:'asok',       th:'อโศก',      en:'Asok' },
+  { id:'thonglor',   th:'ทองหล่อ',   en:'Thonglor' },
+  { id:'siam',       th:'สยาม',      en:'Siam' },
+  { id:'ari',        th:'อารีย์',    en:'Ari' },
+  { id:'promphong',  th:'พร้อมพงษ์', en:'Phrom Phong' }
+];
+
+const SCENARIOS = [
+  { id:'top',     icon:'🏆', th:'คะแนนสูงสุด',  en:'Top Scored',  filt:{},                       sort:{ by:'score', dir:'desc' } },
+  { id:'budget',  icon:'💰', th:'ประหยัด',       en:'Budget',      filt:{ maxPrice:250 },         sort:{ by:'price', dir:'asc' } },
+  { id:'group',   icon:'👥', th:'ทีมใหญ่ 10+',  en:'Big Group',   filt:{ minGroup:10 },           sort:{ by:'score', dir:'desc' } },
+  { id:'healthy', icon:'🌿', th:'Healthy / Work', en:'Healthy',    filt:{ cuisine:'thai' },        sort:{ by:'score', dir:'desc' } },
+  { id:'special', icon:'🎉', th:'โอกาสพิเศษ',   en:'Special Occ', filt:{},                       sort:{ by:'unique', dir:'desc' } },
+  { id:'walk',    icon:'🚇', th:'ใกล้ BTS',      en:'Near BTS',    filt:{ maxBts:5 },              sort:{ by:'bts',   dir:'asc' } }
+];
+
+const CUISINES = [
+  { id:'all',       th:'ทุกประเภท', en:'All' },
+  { id:'thai',      th:'ไทย',       en:'Thai' },
+  { id:'chinese',   th:'จีน',       en:'Chinese' },
+  { id:'japanese',  th:'ญี่ปุ่น',  en:'Japanese' },
+  { id:'korean',    th:'เกาหลี',    en:'Korean' },
+  { id:'western',   th:'Western',   en:'Western' },
+  { id:'mixed',     th:'Mixed',     en:'Mixed' }
+];
+
+// ─── HELPERS ─────────────────────────────────────────────────
+const tx = (l, th, en) => l === 'th' ? th : en;
+const score = (r, w) => Math.round(r.rs.rating*w.rating + r.rs.group*w.group + r.rs.price*w.price + r.rs.travel*w.travel + r.rs.data*w.data + r.rs.unique*w.unique);
+const breakdown = (r, w) => Object.fromEntries(WKEYS.map(({ k }) => [k, Math.round(r.rs[k] * w[k])]));
+const rankCls = (i) => ['r1','r2','r3'][i] || 'rn';
+const priceStr = (pl) => '฿'.repeat(pl) + '·'.repeat(5-pl);
+
+// ─── ANIM BAR ────────────────────────────────────────────────
+function Bar({ pct, col, h=5 }) {
+  const [w, setW] = useState(0);
+  useEffect(() => { const t = setTimeout(() => setW(pct), 90); return () => clearTimeout(t); }, [pct]);
+  return (
+    <div style={{ background:'var(--bord)',borderRadius:h/2,height:h,overflow:'hidden',flex:1,minWidth:0 }}>
+      <div style={{ width:`${w}%`,height:'100%',background:col,borderRadius:h/2,transition:'width .65s cubic-bezier(.4,0,.2,1)' }} />
+    </div>
+  );
+}
+
+// ─── HEADER ──────────────────────────────────────────────────
+function Header({ lang, setLang, count, loadingData }) {
+  return (
+    <header className="app-header">
+      <div className="food-deco" aria-hidden="true">
+        <span style={{top:'8%',left:'3%',fontSize:'2.6rem'}}>🍜</span>
+        <span style={{top:'55%',left:'8%',fontSize:'1.8rem'}}>🥢</span>
+        <span style={{top:'15%',left:'18%',fontSize:'1.4rem'}}>🌶️</span>
+        <span style={{top:'70%',left:'24%',fontSize:'2rem'}}>🍱</span>
+        <span style={{top:'5%',right:'22%',fontSize:'2.2rem'}}>🍣</span>
+        <span style={{top:'60%',right:'16%',fontSize:'1.6rem'}}>🥩</span>
+        <span style={{top:'20%',right:'6%',fontSize:'2.8rem'}}>🍖</span>
+        <span style={{top:'75%',right:'4%',fontSize:'1.8rem'}}>🧆</span>
+        <span style={{top:'40%',right:'30%',fontSize:'1.4rem'}}>🫕</span>
+        <span style={{top:'45%',left:'42%',fontSize:'1.6rem'}}>🥗</span>
+      </div>
+      <div className="hi">
+        <div className="badge">🎓 Homework Submission</div>
+        <h1 className="htitle">
+          AI Food Assistant
+          <span style={{ display:'block',fontStyle:'italic',fontWeight:500,fontSize:'.65em',opacity:.85 }}>Team Dinner</span>
+        </h1>
+        <p className="hsub">{tx(lang,'ค้นหา และแนะนำร้านอาหารสำหรับทีม 8–12 คน ด้วย AI Workflow ย่านอโศก','AI-powered restaurant search & scoring for teams of 8–12 people in Asok area')}</p>
+        <div className="hmeta">
+          <span className="mchip">👥 8–12 {tx(lang,'คน','People')}</span>
+          <span className="mchip">⭐ Rating 4.0+</span>
+          <span className="mchip">📊 {loadingData ? '⏳ loading…' : `${count} ${tx(lang,'ร้าน · Live Sheets','Restaurants · Live Sheets')}`}</span>
+          <span className="mchip">📍 {tx(lang,'อโศก','Asok')}</span>
+          <button className="lbtn" onClick={() => setLang((l) => l==='th'?'en':'th')}>{lang==='th'?'EN →':'ไทย →'}</button>
+        </div>
+      </div>
+    </header>
+  );
+}
+
+// ─── FILTER BAR ───────────────────────────────────────────────
+function FilterBar({ lang, filt, setFilt, sort, setSort, layout, setLayout, showW, setShowW }) {
+  const up = (k, v) => setFilt((f) => ({ ...f, [k]: v }));
+  return (
+    <div className="fbar">
+      <div className="fi" style={{ overflowX:'auto',flexWrap:'nowrap' }}>
+        <span className="flbl">📍</span>
+        <select className="srt" value={filt.area} onChange={(e) => up('area', e.target.value)}>
+          {AREAS.map((a) => <option key={a.id} value={a.id}>{tx(lang, a.th, a.en)}</option>)}
+        </select>
+        <div className="sep" />
+        <span className="flbl">{tx(lang,'ประเภท','Type')}</span>
+        <select className="srt" value={filt.cuisine} onChange={(e) => up('cuisine', e.target.value)}>
+          {CUISINES.map((c) => <option key={c.id} value={c.id}>{tx(lang, c.th, c.en)}</option>)}
+        </select>
+        <div className="sep" />
+        <span className="flbl">{tx(lang,'฿/คน','฿/Person')}</span>
+        <input type="range" min={70} max={450} step={50} value={filt.maxPrice}
+          onChange={(e) => up('maxPrice', +e.target.value)}
+          style={{ width:110,cursor:'pointer',accentColor:'var(--acc)',verticalAlign:'middle' }} />
+        <span style={{ fontSize:'.78rem',fontWeight:700,color:'var(--acc)',minWidth:72,whiteSpace:'nowrap' }}>≤฿{filt.maxPrice.toLocaleString()}/{tx(lang,'คน','pp')}</span>
+        <div className="sep" />
+        <span className="flbl">BTS</span>
+        {[{v:5,l:'≤5 min'},{v:8,l:'≤8 min'},{v:30,l:'Any'}].map((o) =>
+          <button key={o.v} className={`pill${filt.maxBts===o.v?' on':''}`} onClick={() => up('maxBts', o.v)}>{o.l}</button>
+        )}
+        <div className="sep" />
+        <select className="srt" value={sort.by} onChange={(e) => setSort((s) => ({ ...s, by:e.target.value }))}>
+          <option value="score">{tx(lang,'คะแนน AI','AI Score')}</option>
+          <option value="rating">Rating</option>
+          <option value="price">{tx(lang,'ราคา','Price')}</option>
+          <option value="bts">BTS</option>
+        </select>
+        <button className="vbtn" onClick={() => setSort((s) => ({ ...s, dir:s.dir==='desc'?'asc':'desc' }))}>
+          {sort.dir==='desc'?'↓':'↑'}
+        </button>
+        <button className={`vbtn${layout==='cards'?' on':''}`} onClick={() => setLayout('cards')} title="Cards">⊞</button>
+        <button className={`vbtn${layout==='table'?' on':''}`} onClick={() => setLayout('table')} title="Table">≡</button>
+        <button className={`vbtn${layout==='magazine'?' on':''}`} onClick={() => setLayout('magazine')} title="Magazine">◈</button>
+        <button className="wbtn" onClick={() => setShowW((w) => !w)}>⚖️ {tx(lang,'ปรับน้ำหนัก','Weights')}</button>
+      </div>
+    </div>
+  );
+}
+
+// ─── SCENARIO BAR ─────────────────────────────────────────────
+function ScenarioBar({ lang, setFilt, setSort }) {
+  const [active, setActive] = useState(null);
+  const apply = (s) => {
+    if (active === s.id) {
+      setActive(null);
+      setFilt((f) => ({ ...f, cuisine:'all', maxPrice:450, maxBts:30 }));
+      setSort({ by:'score', dir:'desc' });
+    } else {
+      setActive(s.id);
+      setFilt((f) => ({ ...f, cuisine:'all', maxPrice:450, maxBts:30, ...s.filt }));
+      setSort(s.sort);
+    }
+  };
+  return (
+    <div style={{ background:'var(--surf)',borderBottom:'1px solid var(--bord)',overflowX:'auto' }}>
+      <div style={{ maxWidth:1200,margin:'0 auto',padding:'8px 20px',display:'flex',gap:8,alignItems:'center',flexWrap:'nowrap' }}>
+        <span style={{ fontSize:'.68rem',fontWeight:700,textTransform:'uppercase',letterSpacing:'.8px',color:'var(--muted)',whiteSpace:'nowrap',marginRight:4 }}>
+          Scenarios →
+        </span>
+        {SCENARIOS.map((s) =>
+          <button key={s.id} onClick={() => apply(s)}
+            style={{ border:`1.5px solid ${active===s.id?'var(--acc)':'var(--bord)'}`,borderRadius:20,padding:'4px 12px',fontSize:'.76rem',fontWeight:600,cursor:'pointer',whiteSpace:'nowrap',fontFamily:'inherit',background:active===s.id?'var(--acc)':'transparent',color:active===s.id?'white':'var(--ink)',transition:'all .18s' }}>
+            {s.icon} {tx(lang, s.th, s.en)}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── AI ASK BOX ───────────────────────────────────────────────
+function AskBox({ lang, list, weights, data }) {
+  data = data || FALLBACK_DATA;
+  const [q, setQ] = useState('');
+  const [answer, setAnswer] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(true);
+
+  const ruleAnswer = (q) => {
+    const ql = (q||'').toLowerCase();
+    const sorted = [...data].map((r) => ({ ...r, sc: score(r, weights) })).sort((a,b)=>b.sc-a.sc);
+    if (/ถูก|cheap|budget|ประหยัด|ราคาต่ำ/.test(ql)) {
+      const r = [...sorted].sort((a,b)=>a.price-b.price)[0];
+      return tx(lang,`ร้านที่ถูกที่สุดคือ **${r.name}** ราคา ~฿${r.price}/คน เป็น${r.typeTh} คะแนน AI ${r.sc}/100`,`Cheapest: **${r.name}** at ~฿${r.price}/pp (${r.typeEn}) — AI score ${r.sc}/100`);
+    }
+    if (/bts|ใกล้|เดิน|walk|สะดวก/.test(ql)) {
+      const r = [...sorted].sort((a,b)=>a.bts-b.bts)[0];
+      return tx(lang,`ใกล้ BTS ที่สุดคือ **${r.name}** เดินเพียง ${r.bts} นาที คะแนน ${r.sc}/100`,`Closest to BTS: **${r.name}** — ${r.bts}-min walk, score ${r.sc}/100`);
+    }
+    if (/กลุ่มใหญ่|group|ทีม|team|12|10/.test(ql)) {
+      const rs = sorted.filter((r)=>r.grp==='great').slice(0,2);
+      return tx(lang,`ร้านที่เหมาะกลุ่มใหญ่มากที่สุด: **${rs[0]?.name}** (${rs[0]?.sc} pts) และ **${rs[1]?.name}** (${rs[1]?.sc} pts)`,`Best for big groups: **${rs[0]?.name}** (${rs[0]?.sc} pts) & **${rs[1]?.name}** (${rs[1]?.sc} pts)`);
+    }
+    if (/seafood|อาหารทะเล|ซีฟู้ด/.test(ql)) {
+      const r = sorted.find((r)=>r.cuisine==='thai' && r.typeTh.includes('ทะเล')) || sorted[0];
+      return tx(lang,`อาหารทะเลที่ดีที่สุด: **${r.name}** (${r.typeTh}) ฿${r.price}/คน Rating ${r.rating}★`,`Best seafood: **${r.name}** (${r.typeEn}) ฿${r.price}/pp, ${r.rating}★`);
+    }
+    if (/แพง|expensive|premium|special|พิเศษ/.test(ql)) {
+      const r = [...sorted].sort((a,b)=>b.price-a.price)[0];
+      return tx(lang,`Premium ที่สุดคือ **${r.name}** ฿${r.price}/คน เหมาะโอกาสพิเศษ`,`Most premium: **${r.name}** at ฿${r.price}/pp — great for special occasions`);
+    }
+    if (/อันดับ|top|สูง|best|1|หนึ่ง/.test(ql)) {
+      const r = sorted[0];
+      return tx(lang,`คะแนนสูงสุดคือ **${r.name}** ได้ ${r.sc}/100 เป็น${r.typeTh} ราคา ฿${r.price}/คน`,`Top scored: **${r.name}** with ${r.sc}/100 — ${r.typeEn}, ฿${r.price}/pp`);
+    }
+    if (/ไทย|thai/.test(ql)) {
+      const r = sorted.find((r)=>r.cuisine==='thai') || sorted[0];
+      return tx(lang,`อาหารไทยในอโศก: **${r.name}** (${r.typeTh}) ฿${r.price}/คน Rating ${r.rating}★`,`Thai food: **${r.name}** (${r.typeEn}) ฿${r.price}/pp, ${r.rating}★`);
+    }
+    if (/งาน|work|ประชุม|meeting|เงียบ/.test(ql)) {
+      const r = sorted.find((r)=>['Greyhound Café Exchange','Ootoya Exchange Tower','S&P Restaurant อโศก'].some(n=>r.name.includes(n.split(' ')[0]))) || sorted[0];
+      return tx(lang,`เหมาะคุยงานที่สุด: **${r.name}** บรรยากาศเงียบ เหมาะประชุม`,`Best for work meals: **${r.name}** — quiet atmosphere, great for meetings`);
+    }
+    return tx(lang,`จากข้อมูล ${data.length} ร้านในย่านอโศก — แนะนำ **${sorted[0]?.name}** (${sorted[0]?.sc} pts) เป็นอันดับ 1 ใช้ปุ่ม Filter ด้านบนเพื่อปรับเกณฑ์`,`From ${data.length} restaurants in Asok — top pick: **${sorted[0]?.name}** (${sorted[0]?.sc} pts). Use filters above to narrow down.`);
+  };
+
+  const ask = async (question) => {
+    if (!question.trim()) return;
+    setQ(question);
+    setLoading(true);
+    setAnswer(null);
+    try {
+      if (window.claude?.complete) {
+        const ctxStr = data.map((r)=>{const sc=score(r,weights);return `${r.name} (${r.typeTh}): คะแนน ${sc}/100, ฿${r.price}/คน, ${r.rating}★, BTS ${r.bts}นาที`;}).join('\n');
+        const prompt = `You are a concise food assistant for a Bangkok office team in Asok area. Answer in ${lang==='th'?'Thai':'English'} using ONLY this data:\n\n${ctxStr}\n\nQuestion: ${question}\n\nAnswer specifically, mention restaurant names, max 2-3 sentences.`;
+        const resp = await window.claude.complete(prompt);
+        setAnswer(resp);
+      } else {
+        await new Promise((r) => setTimeout(r, 600));
+        setAnswer(ruleAnswer(question));
+      }
+    } catch (e) {
+      setAnswer(ruleAnswer(question));
+    }
+    setLoading(false);
+  };
+
+  const SUGGESTIONS = [
+    { th:'ร้านไหนถูกที่สุด?',      en:'Which is cheapest?' },
+    { th:'ใกล้ BTS ที่สุด?',        en:'Closest to BTS?' },
+    { th:'เหมาะกลุ่ม 12 คน?',       en:'Fits 12 people?' },
+    { th:'อาหารทะเลที่ดีที่สุด?',  en:'Best seafood?' }
+  ];
+
+  const fmt = (text) => {
+    if (!text) return null;
+    const parts = text.split(/\*\*(.*?)\*\*/);
+    return parts.map((p, i) => i%2===1 ? <strong key={i} style={{ color:'var(--acc)' }}>{p}</strong> : p);
+  };
+
+  return (
+    <div style={{ background:'var(--card)',border:'1.5px solid var(--bord)',borderRadius:16,marginBottom:22,overflow:'hidden' }}>
+      <div onClick={() => setOpen((o) => !o)}
+        style={{ display:'flex',alignItems:'center',gap:10,padding:'14px 20px',cursor:'pointer',borderBottom:open?'1px solid var(--bord)':'none' }}>
+        <span style={{ fontSize:'1.1rem' }}>🤖</span>
+        <span style={{ fontFamily:'Playfair Display,serif',fontWeight:700,fontSize:'1rem' }}>
+          {tx(lang,'ถามข้อมูลร้านอาหาร (AI Ask Box)','Ask About Restaurants (AI Ask Box)')}
+        </span>
+        <span style={{ marginLeft:'auto',fontSize:'.75rem',color:'var(--muted)' }}>
+          {tx(lang,'อิงจาก dataset จริง','Based on scraped dataset')} · {open?'▲':'▼'}
+        </span>
+      </div>
+      {open && (
+        <div style={{ padding:'16px 20px' }}>
+          <div style={{ display:'flex',gap:8,flexWrap:'wrap',marginBottom:12 }}>
+            {SUGGESTIONS.map((s,i) =>
+              <button key={i} onClick={() => ask(tx(lang, s.th, s.en))}
+                style={{ border:'1.5px solid var(--bord)',borderRadius:20,padding:'4px 12px',fontSize:'.75rem',background:'var(--surf)',color:'var(--ink)',cursor:'pointer',fontFamily:'inherit',transition:'border-color .15s' }}
+                onMouseOver={(e) => e.target.style.borderColor='var(--acc)'}
+                onMouseOut={(e) => e.target.style.borderColor='var(--bord)'}>
+                {tx(lang, s.th, s.en)}
+              </button>
+            )}
+          </div>
+          <div style={{ display:'flex',gap:8 }}>
+            <input value={q} onChange={(e) => setQ(e.target.value)}
+              onKeyDown={(e) => e.key==='Enter' && ask(q)}
+              placeholder={tx(lang,'ถามเกี่ยวกับร้านอาหาร เช่น ร้านไหนถูกที่สุด...','Ask about restaurants, e.g. which is closest to BTS...')}
+              style={{ flex:1,border:'1.5px solid var(--bord)',borderRadius:8,padding:'8px 12px',fontSize:'.84rem',background:'var(--bg)',color:'var(--ink)',outline:'none',fontFamily:'inherit' }} />
+            <button onClick={() => ask(q)} disabled={loading || !q.trim()}
+              style={{ background:'var(--acc)',color:'white',border:'none',borderRadius:8,padding:'8px 16px',fontSize:'.82rem',fontWeight:600,cursor:'pointer',opacity:loading||!q.trim()?.5:1,fontFamily:'inherit',whiteSpace:'nowrap' }}>
+              {loading?'...':tx(lang,'ถาม →','Ask →')}
+            </button>
+          </div>
+          {(answer||loading) && (
+            <div style={{ marginTop:12,padding:'12px 16px',background:'var(--surf)',borderRadius:10,fontSize:'.84rem',lineHeight:1.7,borderLeft:'3px solid var(--acc)' }}>
+              {loading
+                ? <span style={{ color:'var(--muted)' }}>{tx(lang,'🤖 กำลังวิเคราะห์ข้อมูล...','🤖 Analyzing data...')}</span>
+                : <span>🤖 {fmt(answer)}</span>}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── WEIGHT PANEL ─────────────────────────────────────────────
+function WeightPanel({ lang, weights, setWeights }) {
+  const total = Object.values(weights).reduce((a,b)=>a+b,0);
+  const off = total !== 100;
+  return (
+    <div className="wpanel">
+      <div className="wi">
+        <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:14 }}>
+          <span style={{ fontFamily:'Playfair Display,serif',fontWeight:700,fontSize:'1rem' }}>
+            ⚖️ {tx(lang,'ปรับน้ำหนักการให้คะแนน (100 คะแนน)','Adjust Scoring Weights (100 pts total)')}
+          </span>
+          <div style={{ display:'flex',gap:10,alignItems:'center' }}>
+            <span style={{ fontSize:'.82rem',fontWeight:600,color:off?'#C06B2A':'var(--acc3)' }}>
+              {tx(lang,'รวม','Total')}: <strong>{total}</strong>/100 {off&&'⚠️'}
+            </span>
+            <button className="wreset" onClick={() => setWeights({ ...DW })}>{tx(lang,'รีเซ็ต','Reset')}</button>
+          </div>
+        </div>
+        <div className="wgrid">
+          {WKEYS.map(({ k, th, en, max, col }) =>
+            <div key={k} className="witem">
+              <label>{tx(lang,th,en)}<span className="wval">{weights[k]} pts</span></label>
+              <input type="range" className="wslide" min={0} max={max} value={weights[k]}
+                onChange={(e) => setWeights((w) => ({ ...w, [k]:Number(e.target.value) }))} />
+              <div style={{ height:3,borderRadius:2,background:`linear-gradient(to right,${col} ${weights[k]/max*100}%,var(--bord) ${weights[k]/max*100}%)` }} />
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── RESTAURANT CARD ──────────────────────────────────────────
+function RCard({ r, rank, sc, bk, lang, onClick }) {
+  const [in_, setIn] = useState(false);
+  useEffect(() => { const t = setTimeout(() => setIn(true), 60+rank*30); return () => clearTimeout(t); }, []);
+  return (
+    <div className="rcard" onClick={onClick}
+      style={{ opacity:in_?1:0,transform:in_?'none':'translateY(12px)',transition:`opacity .35s ${rank*.05}s,transform .35s ${rank*.05}s,box-shadow .22s,border-color .22s` }}>
+      <div className="ctop">
+        <div className={`crkbadge ${rankCls(rank)}`}>{rank+1}</div>
+        <div style={{ textAlign:'right' }}>
+          <span className="cscore">{sc}</span>
+          <span className="csdenom">/100</span>
+        </div>
+      </div>
+      <div className="cname">{r.name}</div>
+      <div className="ctype">{tx(lang, r.typeTh, r.typeEn)}</div>
+      <div className="cmeta">
+        <div className="cmi">⭐ <strong>{r.rating}</strong><span>({r.rev}+)</span></div>
+        <div className="cmi">💰 <strong>{priceStr(r.pl)}</strong><span style={{ fontSize:'.72rem' }}> ฿{r.price}/{tx(lang,'คน','pp')}</span></div>
+        <div className="cmi">🚇 <strong>{r.bts} min</strong></div>
+      </div>
+      <div className="sbk">
+        {WKEYS.map(({ k, col }) =>
+          <div key={k} className="srow">
+            <span className="srlab">{k}</span>
+            <Bar pct={r.rs[k]*100} col={col} h={4} />
+            <span className="srval">{bk[k]}</span>
+          </div>
+        )}
+      </div>
+      <div className="ctags">
+        <span className="tchip" style={{ background:'rgba(196,103,58,.1)',color:'var(--acc)' }}>
+          👥 {r.grp==='great' ? tx(lang,'เหมาะมาก','Great') : tx(lang,'ดี','Good')}
+        </span>
+        {r.bts<=5 && <span className="tchip" style={{ background:'rgba(92,122,62,.1)',color:'var(--acc3)' }}>🚇 {tx(lang,'ใกล้ BTS','Near BTS')}</span>}
+        {r.pl<=2 && <span className="tchip" style={{ background:'rgba(212,160,67,.12)',color:'var(--acc2)' }}>💚 {tx(lang,'ราคาดี','Value')}</span>}
+      </div>
+    </div>
+  );
+}
+
+// ─── CARD GRID ────────────────────────────────────────────────
+function CardGrid({ list, lang, onSel, weights }) {
+  if (!list.length) return <div className="empty">🍽️ {tx(lang,'ไม่พบร้านที่ตรงเกณฑ์','No restaurants match your filters')}</div>;
+  return <div className="cgrid">{list.map((r,i) => <RCard key={r.id} r={r} rank={i} sc={r.sc} bk={r.bk} lang={lang} onClick={() => onSel(r)} weights={weights} />)}</div>;
+}
+
+// ─── TABLE VIEW ───────────────────────────────────────────────
+function TableView({ list, lang, onSel, sort, setSort }) {
+  const Th = ({ k, label }) => {
+    const act = sort.by===k;
+    return <th onClick={() => setSort((s)=>({ by:k, dir:s.by===k?s.dir==='desc'?'asc':'desc':'desc' }))} style={{ cursor:'pointer' }}>
+      {label}{act?sort.dir==='desc'?' ↓':' ↑':''}
+    </th>;
+  };
+  if (!list.length) return <div className="empty" style={{ padding:'48px 0' }}>🍽️ {tx(lang,'ไม่พบร้านที่ตรงเกณฑ์','No restaurants match your filters')}</div>;
+  return (
+    <div className="twrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <Th k="score" label={tx(lang,'คะแนน','Score')} />
+            <th>{tx(lang,'ร้านอาหาร','Restaurant')}</th>
+            <th>{tx(lang,'ประเภท','Type')}</th>
+            <Th k="rating" label="Rating" />
+            <Th k="price" label={tx(lang,'ราคา/คน','฿/pp')} />
+            <Th k="bts" label="BTS" />
+            {WKEYS.slice(0,4).map(({ k, en, th }) => <th key={k}>{tx(lang,th,en).split(' ')[0]}</th>)}
+          </tr>
+        </thead>
+        <tbody>
+          {list.map((r,i) =>
+            <tr key={r.id} onClick={() => onSel(r)}>
+              <td><div className={`trk ${rankCls(i)}`}>{i+1}</div></td>
+              <td><span className="tscore">{r.sc}</span></td>
+              <td><strong>{r.name}</strong></td>
+              <td style={{ color:'var(--muted)',fontSize:'.78rem' }}>{tx(lang,r.typeTh,r.typeEn)}</td>
+              <td>⭐ {r.rating}</td>
+              <td style={{ fontSize:'.82rem' }}>฿{r.price}/{tx(lang,'คน','pp')}</td>
+              <td style={{ fontSize:'.82rem' }}>{r.bts}m</td>
+              {WKEYS.slice(0,4).map(({ k, col }) =>
+                <td key={k}>
+                  <div className="barcell">
+                    <Bar pct={r.rs[k]*100} col={col} h={5} />
+                    <span style={{ fontSize:'.66rem',color:'var(--muted)' }}>{r.bk[k]}</span>
+                  </div>
+                </td>
+              )}
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+// ─── MAGAZINE VIEW ────────────────────────────────────────────
+function MagView({ list, lang, onSel }) {
+  const top3=list.slice(0,3), rest=list.slice(3);
+  const labels=[tx(lang,'อันดับ 1 · แนะนำ','#1 Top Pick'),tx(lang,'อันดับ 2','#2 Runner-up'),tx(lang,'อันดับ 3','#3 Third')];
+  if (!list.length) return <div className="empty">🍽️ {tx(lang,'ไม่พบร้านที่ตรงเกณฑ์','No restaurants match your filters')}</div>;
+  return (
+    <div>
+      <div className="mag3">
+        {top3.map((r,i) =>
+          <div key={r.id} className={`mcard${i===0?' gold':''}`} onClick={() => onSel(r)}>
+            <div className="mnum">{i+1}</div>
+            <div style={{ fontSize:'.68rem',fontWeight:700,textTransform:'uppercase',letterSpacing:'1px',color:'var(--muted)',marginBottom:6 }}>{labels[i]}</div>
+            <div className="mname">{r.name}</div>
+            <div style={{ fontSize:'.78rem',color:'var(--muted)',marginBottom:14 }}>{tx(lang,r.typeTh,r.typeEn)}</div>
+            <div style={{ display:'flex',gap:10,alignItems:'baseline',marginBottom:14 }}>
+              <span style={{ fontFamily:'Playfair Display,serif',fontSize:'2.2rem',fontWeight:800,color:'var(--acc)',lineHeight:1 }}>{r.sc}</span>
+              <span style={{ color:'var(--muted)',fontSize:'.80rem' }}>/100</span>
+              <span style={{ marginLeft:'auto',fontSize:'.85rem' }}>⭐ {r.rating}</span>
+            </div>
+            {WKEYS.slice(0,4).map(({ k, col }) =>
+              <div key={k} style={{ display:'flex',alignItems:'center',gap:8,marginBottom:5 }}>
+                <span style={{ fontSize:'.66rem',width:58,color:'var(--muted)',textTransform:'capitalize',flexShrink:0 }}>{k}</span>
+                <Bar pct={r.rs[k]*100} col={col} h={4} />
+                <span style={{ fontSize:'.68rem',fontWeight:600,width:22,textAlign:'right' }}>{r.bk[k]}</span>
+              </div>
+            )}
+            <div style={{ marginTop:12,padding:'9px 12px',background:'var(--surf)',borderRadius:8,fontSize:'.76rem',fontStyle:'italic',lineHeight:1.5 }}>
+              "{tx(lang,r.hlTh,r.hlEn)}"
+            </div>
+          </div>
+        )}
+      </div>
+      {rest.length>0 && <>
+        <h3 style={{ fontFamily:'Playfair Display,serif',fontSize:'.95rem',fontWeight:700,marginBottom:12,color:'var(--muted)' }}>
+          {tx(lang,'อันดับ 4–12','Ranked 4–12')}
+        </h3>
+        <div className="mlist">
+          {rest.map((r,i) =>
+            <div key={r.id} className="mli" onClick={() => onSel(r)}>
+              <div className={`crkbadge ${rankCls(i+3)}`} style={{ width:28,height:28,flexShrink:0 }}>{i+4}</div>
+              <div style={{ flex:1,minWidth:0 }}>
+                <div style={{ fontWeight:700,fontSize:'.88rem',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis' }}>{r.name}</div>
+                <div style={{ fontSize:'.73rem',color:'var(--muted)' }}>{tx(lang,r.typeTh,r.typeEn)} · ⭐{r.rating} · ฿{r.price}/{tx(lang,'คน','pp')} · 🚇{r.bts}min</div>
+              </div>
+              <div style={{ display:'flex',alignItems:'center',gap:10,flexShrink:0 }}>
+                <div style={{ width:80 }}><Bar pct={r.sc} col='var(--acc)' h={5} /></div>
+                <span style={{ fontWeight:800,fontSize:'1rem',color:'var(--acc)',width:32,textAlign:'right' }}>{r.sc}</span>
+              </div>
+            </div>
+          )}
+        </div>
+      </>}
+    </div>
+  );
+}
+
+// ─── DETAIL MODAL ─────────────────────────────────────────────
+function Modal({ r, weights, lang, onClose }) {
+  const sc = score(r, weights);
+  const bk = breakdown(r, weights);
+  useEffect(() => {
+    const h = (e) => { if (e.key==='Escape') onClose(); };
+    window.addEventListener('keydown', h);
+    return () => window.removeEventListener('keydown', h);
+  }, []);
+  return (
+    <div className="movl" onClick={(e) => e.target===e.currentTarget && onClose()}>
+      <div className="mbox">
+        <div className="mhdr">
+          <button className="mclose" onClick={onClose}>✕</button>
+          <div style={{ fontSize:'.68rem',fontWeight:700,textTransform:'uppercase',letterSpacing:'1.2px',opacity:.7,marginBottom:6 }}>{tx(lang,'รายละเอียด','Restaurant Detail')}</div>
+          <div style={{ fontFamily:'Playfair Display,serif',fontSize:'1.65rem',fontWeight:800,marginBottom:4 }}>{r.name}</div>
+          <div style={{ opacity:.78,fontSize:'.85rem',marginBottom:16 }}>{tx(lang,r.typeTh,r.typeEn)}</div>
+          <div style={{ display:'flex',gap:20,alignItems:'center',flexWrap:'wrap' }}>
+            <div style={{ display:'flex',flexDirection:'column',alignItems:'center',gap:2 }}>
+              <span style={{ fontFamily:'Playfair Display,serif',fontSize:'2.8rem',fontWeight:900,lineHeight:1,color:'var(--acc2)' }}>{sc}</span>
+              <span style={{ fontSize:'.72rem',opacity:.7 }}>/ 100 pts</span>
+            </div>
+            <div style={{ display:'flex',flexDirection:'column',gap:5,fontSize:'.83rem' }}>
+              <span>⭐ {r.rating}/5.0 ({r.rev}+ {tx(lang,'รีวิว','reviews')})</span>
+              <span>💰 ~฿{r.price}/{tx(lang,'คน','person')}</span>
+              <span>🚇 {r.bts} min {tx(lang,'จาก BTS อโศก','from BTS Asok')}</span>
+            </div>
+          </div>
+        </div>
+        <div className="mbody">
+          <div className="msec">{tx(lang,'คะแนนรายหมวด','Score Breakdown')}</div>
+          {WKEYS.map(({ k, th, en, col }) =>
+            <div key={k} className="mscrow">
+              <span className="msclbl">{tx(lang,th,en)}</span>
+              <div className="mscbar"><Bar pct={r.rs[k]*100} col={col} h={8} /></div>
+              <span className="mscnum">{bk[k]}/{weights[k]}</span>
+            </div>
+          )}
+          <div className="msec">{tx(lang,'จุดเด่น / ข้อควรระวัง','Pros & Cons')}</div>
+          <div className="pc">
+            <div>{(lang==='th'?r.prosTh:r.prosEn).map((p,i) =>
+              <div key={i} className="pci"><span className="pd">✓</span><span>{p}</span></div>
+            )}</div>
+            <div>{(lang==='th'?r.consTh:r.consEn).map((c,i) =>
+              <div key={i} className="pci"><span className="cd">!</span><span>{c}</span></div>
+            )}</div>
+          </div>
+          <div className="msec">Sentiment Analysis (AI)</div>
+          <div style={{ fontSize:'.78rem',color:'var(--muted)',marginBottom:7 }}>
+            <span style={{ color:'#5C7A3E',fontWeight:600 }}>{r.sent.p}% Positive</span>
+            {' · '}<span>{r.sent.n}% Neutral</span>
+            {' · '}<span style={{ color:'#C4673A',fontWeight:600 }}>{r.sent.neg}% Negative</span>
+          </div>
+          <div className="sentbar">
+            <div style={{ width:`${r.sent.p}%`,background:'#5C7A3E' }} />
+            <div style={{ width:`${r.sent.n}%`,background:'var(--bord)' }} />
+            <div style={{ width:`${r.sent.neg}%`,background:'#C4673A' }} />
+          </div>
+          <div style={{ marginTop:16,padding:'12px 16px',background:'var(--surf)',borderRadius:10,fontSize:'.84rem',fontStyle:'italic',lineHeight:1.6 }}>
+            💡 {tx(lang,r.hlTh,r.hlEn)}
+          </div>
+          <div style={{ marginTop:14 }}>
+            <a href={r.url} target="_blank" rel="noopener noreferrer"
+              style={{ display:'inline-flex',alignItems:'center',gap:6,background:'var(--acc)',color:'white',textDecoration:'none',borderRadius:8,padding:'8px 18px',fontSize:'.82rem',fontWeight:600 }}>
+              📍 {tx(lang,'ดูบนแผนที่','View on Maps')}
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── HOMEWORK EVIDENCE ────────────────────────────────────────
+function HomeworkEvidence({ lang, weights, list }) {
+  const ranked = [...(list||[])].sort((a,b)=>b.sc-a.sc).slice(0,3);
+  return (
+    <>
+      <div className="section-title">{tx(lang,'สรุปหลักฐานงานส่ง','Submission Evidence Summary')}</div>
+      <div className="kpirow">
+        <div className="kpi"><div className="kpin">8</div><div className="kpil">Workflow Steps</div></div>
+        <div className="kpi"><div className="kpin">25</div><div className="kpil">Cleaned Restaurants</div></div>
+        <div className="kpi"><div className="kpin">6</div><div className="kpil">Scoring Factors</div></div>
+        <div className="kpi"><div className="kpin">100</div><div className="kpil">Total Weight</div></div>
+        <div className="kpi"><div className="kpin">2</div><div className="kpil">Data Sources</div></div>
+      </div>
+      <div className="evidence">
+        <div className="evcard">
+          <div className="evtitle">1) Problem Framing</div>
+          <p className="evtext">{tx(lang,'โจทย์คือเลือกร้านอาหารสำหรับทีม 8–12 คนในย่านอโศก โดยต้องบาลานซ์รีวิว ราคา การเดินทาง ความเหมาะกับกลุ่ม และประสบการณ์','Goal: choose a restaurant for an 8–12 person team dinner in Asok, balancing reviews, price, travel, group fit, and experience.')}</p>
+          <ul className="evlist"><li>Area: อโศก (Asok)</li><li>Decision target: Top 3 recommendations</li><li>Output: Interactive HTML page</li></ul>
+        </div>
+        <div className="evcard">
+          <div className="evtitle">2) Data Collection</div>
+          <p className="evtext">{tx(lang,'รวบรวมข้อมูลจาก Google Maps และ Wongnai โดย scrape ร้านใกล้ BTS อโศก แล้วจัดเก็บเป็น dataset สำหรับ clean และ score','Collected data from Google Maps and Wongnai for restaurants near BTS Asok, stored as dataset for cleaning and scoring.')}</p>
+          <ul className="evlist"><li>Sources: Google Maps, Wongnai</li><li>Tool: Apify Google Maps Scraper</li><li>12 restaurants collected</li></ul>
+        </div>
+        <div className="evcard">
+          <div className="evtitle">3) Data Storage & Cleaning</div>
+          <p className="evtext">{tx(lang,'Raw data ใส่ Google Sheets แล้ว clean ด้วย AI: deduplicate, normalize ราคา, categorize ประเภทร้าน, คำนวณ rs ratios','Raw data stored in Google Sheets, cleaned with AI: deduplication, price normalization, restaurant categorization, rs ratio calculation.')}</p>
+          <ul className="evlist"><li>Raw Sheet: name, price, rating, reviews</li><li>Clean Sheet: rs ratios, pros/cons, group fit</li></ul>
+        </div>
+        <div className="evcard">
+          <div className="evtitle">4) Scoring Model</div>
+          <p className="evtext">{tx(lang,'ใช้ weighted scoring รวม 6 ปัจจัย น้ำหนักรวม 100 คะแนน และผู้ใช้สามารถปรับน้ำหนักเองได้ในหน้าเว็บ','Uses a 6-factor weighted scoring model totaling 100 points; users can adjust weights directly in the web page.')}</p>
+          <ul className="evlist"><li>Rating & Review 25 pts</li><li>Group Suitability 20 pts</li><li>Price / Travel / Data 15 pts each</li><li>Uniqueness 10 pts</li></ul>
+        </div>
+        <div className="evcard">
+          <div className="evtitle">5) Top 3 · Current Ranking</div>
+          <p className="evtext">{tx(lang,'ระบบจัดอันดับจากคะแนนรวมแบบถ่วงน้ำหนัก อันดับปัจจุบัน (ปรับน้ำหนักได้):','Current weighted-score ranking (adjustable weights):')}</p>
+          <ul className="evlist">{ranked.map((r,i)=><li key={r.id}>#{i+1} {r.name} — {r.sc}/100</li>)}</ul>
+        </div>
+        <div className="evcard">
+          <div className="evtitle">6) AI Analysis & Automation</div>
+          <p className="evtext">{tx(lang,'มี AI Ask Box สำหรับถามคำถามจาก dataset และ Automation pipeline: Apify → n8n webhook → Google Sheets → Claude API','AI Ask Box for dataset queries. Automation: Apify scraper → n8n webhook → Google Sheets → Claude API enrichment.')}</p>
+          <ul className="evlist"><li>Apify Google Maps Scraper</li><li>n8n: receive → clean → score → update Sheets</li><li>Claude API: pros/cons + sentiment</li></ul>
+        </div>
+      </div>
+      <div className="submit-box">
+        <strong>{tx(lang,'✅ Checklist ก่อนส่ง:','✅ Submission Checklist:')}</strong><br/>
+        {tx(lang,
+          '☑ HTML Page (this file) · ☑ Google Sheets (raw + clean data) · ☑ Scraping evidence (Apify export) · ☑ Prompt history · ☑ n8n automation workflow · ☑ Top 3 recommendation · ☑ AI Ask Box grounded on dataset',
+          '☑ HTML Page (this file) · ☑ Google Sheets (raw + clean data) · ☑ Scraping evidence (Apify export) · ☑ Prompt history · ☑ n8n automation workflow · ☑ Top 3 recommendation · ☑ AI Ask Box grounded on dataset'
+        )}
+      </div>
+    </>
+  );
+}
+
+// ─── APP ──────────────────────────────────────────────────────
+function App() {
+  const [t, setTweak] = useTweaks({ theme:'warm' });
+  const [lang, setLang] = useState('th');
+  const [weights, setWeights] = useState({ ...DW });
+  const [filt, setFilt] = useState({ cuisine:'all', maxPrice:450, maxBts:30, area:'asok' });
+  const [sort, setSort] = useState({ by:'score', dir:'desc' });
+  const [layout, setLayout] = useState('cards');
+  const [showW, setShowW] = useState(false);
+  const [sel, setSel] = useState(null);
+  const [data, setData] = useState(FALLBACK_DATA);
+  const [loadingData, setLoadingData] = useState(true);
+  const [lastUpdated, setLastUpdated] = useState(null);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const loadData = () => {
+    setRefreshing(true);
+    fetchFromSheets()
+      .then(d => { if (d && d.length > 0) { setData(d); setLastUpdated(new Date()); } })
+      .catch(() => {})
+      .finally(() => { setLoadingData(false); setRefreshing(false); });
+  };
+
+  useEffect(() => { loadData(); }, []);
+
+  const thVars = THEMES[t.theme] || THEMES.warm;
+
+  const list = useMemo(() => {
+    return data
+      .filter((r) => {
+        // area filter: FALLBACK_DATA has no area field → default 'asok'
+        if ((r.area || 'asok') !== filt.area) return false;
+        if (filt.cuisine !== 'all' && r.cuisine !== filt.cuisine) return false;
+        if (r.price > filt.maxPrice) return false;
+        if (r.bts > filt.maxBts) return false;
+        return true;
+      })
+      .map((r) => ({ ...r, sc:score(r,weights), bk:breakdown(r,weights) }))
+      .sort((a,b) => {
+        const d = sort.dir==='desc'?-1:1;
+        if (sort.by==='score')  return d*(a.sc-b.sc);
+        if (sort.by==='rating') return d*(a.rating-b.rating);
+        if (sort.by==='price')  return d*(a.price-b.price);
+        if (sort.by==='bts')    return d*(a.bts-b.bts);
+        return 0;
+      });
+  }, [data, weights, filt, sort]);
+
+  return (
+    <div style={thVars}>
+      <Header lang={lang} setLang={setLang} count={data.length} loadingData={loadingData} />
+      <FilterBar lang={lang} filt={filt} setFilt={setFilt} sort={sort} setSort={setSort} layout={layout} setLayout={setLayout} showW={showW} setShowW={setShowW} />
+      {showW && <WeightPanel lang={lang} weights={weights} setWeights={setWeights} />}
+      <ScenarioBar lang={lang} setFilt={setFilt} setSort={setSort} />
+      <div className="main">
+        {loadingData ? (
+          <div style={{ display:'flex',alignItems:'center',gap:8,padding:'8px 14px',background:'rgba(212,160,67,0.12)',border:'1px solid rgba(212,160,67,0.35)',borderRadius:10,marginBottom:14,fontSize:'.78rem',color:'var(--ink)' }}>
+            <span>⏳</span><span>กำลังโหลดข้อมูลจาก Google Sheets...</span>
+          </div>
+        ) : (
+          <div style={{ display:'flex',alignItems:'center',gap:8,padding:'8px 14px',background:'rgba(90,160,90,0.12)',border:'1px solid rgba(90,160,90,0.35)',borderRadius:10,marginBottom:14,fontSize:'.78rem',color:'var(--ink)' }}>
+            <span style={{ fontSize:'1rem' }}>🟢</span>
+            <span style={{ flex:1 }}>
+              <strong>LIVE</strong> · อ่านจาก Google Sheets · <strong>{data.length} ร้าน</strong>
+              {lastUpdated && <span style={{ opacity:.7 }}> · อัพเดท {lastUpdated.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}</span>}
+            </span>
+            <button onClick={loadData} disabled={refreshing}
+              style={{ padding:'3px 12px',borderRadius:6,border:'1px solid rgba(90,160,90,0.5)',background:'rgba(90,160,90,0.15)',cursor:'pointer',fontSize:'.75rem',fontWeight:600,color:'var(--ink)',opacity:refreshing?0.5:1 }}>
+              {refreshing ? '⏳' : '🔄'} รีโหลด
+            </button>
+          </div>
+        )}
+        {list.length === 0 && !loadingData ? (
+          <div style={{ textAlign:'center',padding:'60px 20px',color:'var(--muted)' }}>
+            <div style={{ fontSize:'2.8rem',marginBottom:12 }}>🗺️</div>
+            <div style={{ fontFamily:'Playfair Display,serif',fontSize:'1.25rem',fontWeight:700,marginBottom:8,color:'var(--ink)' }}>
+              {tx(lang,
+                `ยังไม่มีข้อมูลโซน${AREAS.find(a=>a.id===filt.area)?.th || filt.area}`,
+                `No data yet for ${AREAS.find(a=>a.id===filt.area)?.en || filt.area}`
+              )}
+            </div>
+            <div style={{ fontSize:'.85rem',marginBottom:20 }}>
+              {tx(lang,'รัน Apify + n8n เพื่อดึงข้อมูลโซนนี้ แล้วกด รีโหลด','Run Apify + n8n to scrape this zone, then click Reload')}
+            </div>
+            <button onClick={loadData}
+              style={{ padding:'8px 22px',borderRadius:8,border:'1px solid var(--acc)',background:'var(--acc)',color:'white',cursor:'pointer',fontSize:'.83rem',fontWeight:600 }}>
+              🔄 {tx(lang,'รีโหลดข้อมูล','Reload Data')}
+            </button>
+          </div>
+        ) : (
+          <>
+            <AskBox lang={lang} list={list} weights={weights} data={data} />
+            {layout==='cards'    && <CardGrid    list={list} lang={lang} onSel={setSel} weights={weights} />}
+            {layout==='table'    && <TableView   list={list} lang={lang} onSel={setSel} sort={sort} setSort={setSort} />}
+            {layout==='magazine' && <MagView     list={list} lang={lang} onSel={setSel} />}
+            <HomeworkEvidence lang={lang} weights={weights} list={list} />
+          </>
+        )}
+      </div>
+      {sel && <Modal r={sel} weights={weights} lang={lang} onClose={() => setSel(null)} />}
+      <TweaksPanel>
+        <TweakSection label={tx(lang,'ธีมสี','Color Theme')} />
+        <TweakRadio label={tx(lang,'ธีม','Theme')} value={t.theme}
+          options={['warm','dark','sage']}
+          onChange={(v) => setTweak('theme', v)} />
+        <TweakSection label={tx(lang,'มุมมอง','Layout')} />
+        <TweakRadio label={tx(lang,'วิว','View')} value={layout}
+          options={['cards','table','magazine']}
+          onChange={(v) => setLayout(v)} />
+      </TweaksPanel>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
